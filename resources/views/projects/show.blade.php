@@ -16,10 +16,28 @@
             <div class="lg:w-3/4 px-3 mb-6">
                 <div class="mb-8">
                     <h2 class="text-lg text-grey font-normal mb-3">Tasks</h2>
-                    <div class="card mb-3">Lorem Ipsum...</div>
-                    <div class="card mb-3">Lorem Ipsum...</div>
-                    <div class="card mb-3">Lorem Ipsum...</div>
-                    <div class="card">Lorem Ipsum...</div>
+
+                    @foreach ($project->tasks as $task)
+                        <div class="card mb-3">
+                            <form action="{{ $task->path() }}" method="post">
+                                @method('PATCH')
+                                @csrf
+
+                                <div class="flex">
+                                    <input type="text" value="{{ $task->body }}" name="body" class="w-full {{ $task->completed ? 'text-grey line-through' : '' }}">
+                                    <input type="checkbox" name="completed" onchange="this.form.submit()" {{ $task->completed ? 'checked' : '' }}>
+                                </div>
+                            </form>
+                        </div>
+                    @endforeach
+
+                    <div class="card mb-3">
+                        <form action="{{ $project->path() . '/tasks' }}" method="post">
+                            @csrf
+
+                            <input type="text" placeholder="Begin a new task..." class="w-full" name="body">
+                        </form>
+                    </div>
                 </div>
 
                 <div>
@@ -28,7 +46,7 @@
                 </div>
             </div>
 
-            <div class="lg:w-1/4 px-3">
+            <div class="lg:w-1/4 px-3 mt-8">
                 @include ('projects.card')
             </div>
         </div>
