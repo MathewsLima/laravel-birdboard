@@ -12,11 +12,6 @@ class ManageProjectsTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
 
-    private function login()
-    {
-        return $this->actingAs(factory(User::class)->create());
-    }
-
     /** @test */
     public function guests_cannot_create_projects()
     {
@@ -58,7 +53,7 @@ class ManageProjectsTest extends TestCase
             'description' => $this->faker->paragraph
         ];
 
-        $this->login()
+        $this->signIn()
             ->post('/projects', $attributes)
             ->assertRedirect('/projects');
 
@@ -71,15 +66,13 @@ class ManageProjectsTest extends TestCase
     /** @test */
     public function a_user_can_view_their_project()
     {
-        $this->withoutExceptionHandling();
-
-        $this->login();
+        $this->signIn();
 
         $project = factory(Project::class)->create(['user_id' => auth()->id()]);
 
         $this->get($project->path())
             ->assertSee($project->title)
-            ->assertSee($project->description);
+            ->assertSee(\Str::limit($project->description, 100));
     }
 
     /** @test */
@@ -87,7 +80,7 @@ class ManageProjectsTest extends TestCase
     {
         $project = factory(Project::class)->create();
 
-        $this->login()
+        $this->signIn()
             ->get($project->path())
             ->assertForbidden();
     }
@@ -97,7 +90,7 @@ class ManageProjectsTest extends TestCase
     {
         $attributes = factory(Project::class)->raw(['title' => '']);
 
-        $this->login()
+        $this->signIn()
             ->post('/projects', $attributes)
             ->assertSessionHasErrors('title');
     }
@@ -107,7 +100,7 @@ class ManageProjectsTest extends TestCase
     {
         $attributes = factory(Project::class)->raw(['description' => '']);
 
-        $this->login()
+        $this->signIn()
             ->post('/projects', $attributes)
             ->assertSessionHasErrors('description');
     }
