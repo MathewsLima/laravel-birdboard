@@ -4,19 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Project;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class ProjectController extends Controller
 {
     public function index()
     {
-        $projects = Project::all();
+        $projects = auth()->user()->projects;
 
         return view('projects.index')->withProjects($projects);
     }
 
     public function show(Project $project)
     {
+        abort_if(auth()->user()->isNot($project->user), Response::HTTP_FORBIDDEN);
+
         return view('projects.show')->withProject($project);
+    }
+
+    public function create()
+    {
+        return view('projects.create');
     }
 
     public function store(Request $request)
@@ -26,11 +34,7 @@ class ProjectController extends Controller
             'description' => 'required',
         ]);
 
-        // $attributes['user_id'] = auth()->id();
-
         auth()->user()->projects()->create($attributes);
-
-        // Project::create($attributes);
 
         return redirect('/projects');
     }
