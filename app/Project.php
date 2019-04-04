@@ -23,8 +23,18 @@ class Project extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function activity()
+    {
+        return $this->hasMany(Activity::class);
+    }
+
     public function addTask(string $body)
     {
         return $this->tasks()->create(['body' => $body]);
+    }
+
+    public function recordActivity(string $description)
+    {
+        $this->activity()->create(['description' => $description]);
     }
 }
