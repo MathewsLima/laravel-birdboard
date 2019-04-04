@@ -1,27 +1,32 @@
-@extends('layouts.app')
+@extends ('layouts.app')
 
 @section('content')
-    <div class="container">
-        <h1>Create a Project</h1>
+    <form method="POST" action="/projects" class="lg:w-1/2 lg:mx-auto bg-white py-12 px-16 rounded shadow">
+        @csrf
 
-        <form action="/projects" method="POST">
-            @csrf
+        <h1 class="text-2xl font-normal mb-10 text-center">Let’s start something new</h1>
 
-            <div class="form-group">
-                <label for="title">Title</label>
-                <input type="text" id="title" name="title" class="form-control" value="{{ old('title') }}">
+        <div class="field mb-6">
+            <label class="label text-sm mb-2 block" for="title">Title</label>
+
+            <div class="control">
+                <input type="text" class="input bg-transparent border border-grey-light rounded p-2 text-xs w-full" name="title" placeholder="My next awesome project">
             </div>
+        </div>
 
-            <div class="form-group">
-                <label for="description">Description</label>
-                <textarea name="description" id="description" cols="30" rows="10" class="form-control">{{ old('description') }}</textarea>
+        <div class="field mb-6">
+            <label class="label text-sm mb-2 block" for="description">Description</label>
+
+            <div class="control">
+                <textarea name="description" rows="10" class="textarea bg-transparent border border-grey-light rounded p-2 text-xs w-full" placeholder="I should start learning piano."></textarea>
             </div>
+        </div>
 
-            <div class="form-group">
-                <button class="btn btn-primary">Submit</button>
-                <a href="/projects" class="btn btn-link">Cancel</a>
+        <div class="field">
+            <div class="control">
+                <button type="submit" class="button is-link mr-2">Create Project</button>
+                <a href="/projects">Cancel</a>
             </div>
-
-        </form>
-    </div>
+        </div>
+    </form>
 @endsection
