@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Project;
 use App\Task;
-use Illuminate\Http\Response;
 
 class ProjectTaskController extends Controller
 {
     public function store(Project $project)
     {
-        abort_if(auth()->user()->isNot($project->user), Response::HTTP_FORBIDDEN);
+        $this->authorize('store', $project);
 
         request()->validate(['body' => 'required']);
 
@@ -21,7 +20,7 @@ class ProjectTaskController extends Controller
 
     public function update(Project $project, Task $task)
     {
-        abort_if(auth()->user()->isNot($project->user), Response::HTTP_FORBIDDEN);
+        $this->authorize('update', $project);
 
         request()->validate(['body' => 'required']);
 

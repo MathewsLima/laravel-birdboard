@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Project;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class ProjectController extends Controller
 {
@@ -17,7 +16,7 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        abort_if(auth()->user()->isNot($project->user), Response::HTTP_FORBIDDEN);
+        $this->authorize('show', $project);
 
         return view('projects.show')->withProject($project);
     }
@@ -27,14 +26,24 @@ class ProjectController extends Controller
         return view('projects.create');
     }
 
-    public function store(Request $request)
+    public function store()
     {
         $attributes = request()->validate([
             'title'       => 'required',
             'description' => 'required',
+            'notes'       => 'min:3'
         ]);
 
         $project = auth()->user()->projects()->create($attributes);
+
+        return redirect($project->path());
+    }
+
+    public function update(Project $project)
+    {
+        $this->authorize('update', $project);
+
+        $project->update(request(['notes']));
 
         return redirect($project->path());
     }
