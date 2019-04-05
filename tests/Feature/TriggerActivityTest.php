@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Task;
 use Facades\Tests\Setup\ProjectFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,21 +14,33 @@ class TriggerActivityTest extends TestCase
     /** @test */
     public function creating_a_project()
     {
-        $project = ProjectFactory::create();
+        $project  = ProjectFactory::create();
+        $activity = $project->activity->last();
 
         $this->assertCount(1, $project->activity);
-        $this->assertEquals('created', $project->activity->first()->description);
+        $this->assertEquals('created_project', $activity->description);
+        $this->assertNull($activity->changes);
     }
 
     /** @test */
     public function updating_a_project()
     {
-        $project = ProjectFactory::create();
+        $project       = ProjectFactory::create();
+        $originalTitle = $project->title;
 
-        $project->update(['title' => 'changed']);
+        $project->update(['title' => 'Changed']);
+
+        $activity = $project->activity->last();
 
         $this->assertCount(2, $project->activity);
-        $this->assertEquals('updated', $project->activity->last()->description);
+        $this->assertEquals('updated_project', $activity->description);
+
+        $expected = [
+            'before' => ['title' => $originalTitle],
+            'after'  => ['title' => 'Changed']
+        ];
+
+        $this->assertEquals($expected, $activity->changes);
     }
 
     /** @test */
@@ -37,8 +50,12 @@ class TriggerActivityTest extends TestCase
 
         $project->addTask('Some Task');
 
+        $activity = $project->activity->last();
+
         $this->assertCount(2, $project->activity);
-        $this->assertEquals('created_task', $project->activity->last()->description);
+        $this->assertEquals('created_task', $activity->description);
+        $this->assertInstanceOf(Task::class, $activity->subject);
+        $this->assertEquals('Some Task', $activity->subject->body);
     }
 
     /** @test */
@@ -53,8 +70,11 @@ class TriggerActivityTest extends TestCase
             'completed' => true
         ]);
 
+        $activity = $project->activity->last();
+
         $this->assertCount(3, $project->activity);
-        $this->assertEquals('completed_task', $project->activity->last()->description);
+        $this->assertEquals('completed_task', $activity->description);
+        $this->assertInstanceOf(Task::class, $activity->subject);
     }
 
     /** @test */
