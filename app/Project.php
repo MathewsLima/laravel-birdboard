@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    protected $fillable = ['title', 'description', 'notes', 'user_id'];
+    use RecordsActivity;
+
+    protected $fillable = [
+        'title', 'description', 'notes', 'user_id',
+    ];
 
     public function path()
     {
@@ -25,16 +29,11 @@ class Project extends Model
 
     public function activity()
     {
-        return $this->hasMany(Activity::class);
+        return $this->hasMany(Activity::class)->latest();
     }
 
     public function addTask(string $body)
     {
         return $this->tasks()->create(['body' => $body]);
-    }
-
-    public function recordActivity(string $description)
-    {
-        $this->activity()->create(['description' => $description]);
     }
 }
