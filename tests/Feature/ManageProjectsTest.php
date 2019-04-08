@@ -47,25 +47,33 @@ class ManageProjectsTest extends TestCase
     /** @test */
     public function a_user_can_create_a_project()
     {
-        $attributes = [
-            'title'       => $this->faker->sentence,
-            'description' => $this->faker->sentence,
-            'notes'       => 'General Notes Here.'
-        ];
+        $this->signIn();
 
-        $response = $this->actingAs($this->signIn())
-            ->post('/projects', $attributes);
+        $attributes = factory(Project::class)->raw(['user_id' => auth()->id()]);
 
-        $project = Project::where($attributes)->first();
-
-        $response->assertRedirect($project->path());
-
-        $this->assertDatabaseHas('projects', $attributes);
-
-        $this->get($project->path())
+        $this->followingRedirects()
+            ->post('/projects', $attributes)
             ->assertSee($attributes['title'])
-            ->assertSee($attributes['description'])
+            ->assertSee(\Str::limit($attributes['description'], 100))
             ->assertSee($attributes['notes']);
+
+        $this->assertDatabaseHas('projects', [
+            'title'       => $attributes['title'],
+            'description' => $attributes['description'],
+            'notes'       => $attributes['notes'],
+        ]);
+    }
+
+    /** @test */
+    public function a_user_can_see_all_projects_they_have_been_invited_on_their_dashboard()
+    {
+        $user    = $this->signIn();
+        $project = ProjectFactory::create();
+
+        $project->invite($user);
+
+        $this->get('/projects')
+            ->assertSee($project->title);
     }
 
     /** @test */
@@ -76,7 +84,12 @@ class ManageProjectsTest extends TestCase
         $this->delete($project->path())
             ->assertRedirect('/login');
 
-        $this->signIn();
+        $user = $this->signIn();
+
+        $this->delete($project->path())
+            ->assertForbidden();
+
+        $project->invite($user);
 
         $this->delete($project->path())
             ->assertForbidden();
