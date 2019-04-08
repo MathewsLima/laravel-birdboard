@@ -34,7 +34,7 @@ trait RecordsActivity
     {
         return isset(static::$recordableEvents)
             ? collect(static::$recordableEvents)
-            : collect(['created', 'updated', 'deleted']);
+            : collect(['created', 'updated']);
     }
 
     protected function activityDescription(string $description)
@@ -47,7 +47,8 @@ trait RecordsActivity
         $this->activity()->create([
             'description' => $description,
             'changes'     => $this->activityChanges(),
-            'project_id'  => class_basename($this) === 'Project' ? $this->id : $this->project_id
+            'project_id'  => class_basename($this) === 'Project' ? $this->id : $this->project_id,
+            'user_id'     => ($this->project ?? $this)->user->id
         ]);
     }
 
