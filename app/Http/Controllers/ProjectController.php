@@ -16,7 +16,7 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        $this->authorize('show', $project);
+        $this->authorize('update', $project);
 
         return view('projects.show')->withProject($project);
     }
@@ -45,6 +45,15 @@ class ProjectController extends Controller
         $project->update($this->validateRequest());
 
         return redirect($project->path());
+    }
+
+    public function destroy(Project $project)
+    {
+        $this->authorize('update', $project);
+
+        $project->delete();
+
+        return redirect('/projects');
     }
 
     protected function validateRequest()
