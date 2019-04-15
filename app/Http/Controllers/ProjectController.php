@@ -73,7 +73,7 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function filteredTasks(array $tasks)
+    public function filteredTasks(? array $tasks)
     {
         return collect($tasks)->filter(function ($task) {
             return $task['body'];
