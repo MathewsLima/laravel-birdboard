@@ -37,6 +37,11 @@ class Project extends Model
         return $this->belongsToMany(User::class, 'project_members')->withTimestamps();
     }
 
+    public function addTasks(array $tasks)
+    {
+        return $this->tasks()->createMany($tasks);
+    }
+
     public function addTask(string $body)
     {
         return $this->tasks()->create(['body' => $body]);
