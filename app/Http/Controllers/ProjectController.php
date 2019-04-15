@@ -30,6 +30,14 @@ class ProjectController extends Controller
     {
         $project = auth()->user()->projects()->create($this->validateRequest());
 
+        if ($tasks = $this->filteredTasks(request('tasks'))) {
+            $project->addTasks($tasks);
+        }
+
+        if (request()->wantsJson()) {
+            return ['message' => $project->path()];
+        }
+
         return redirect($project->path());
     }
 
@@ -63,5 +71,12 @@ class ProjectController extends Controller
             'description' => 'sometimes|required',
             'notes'       => 'nullable'
         ]);
+    }
+
+    public function filteredTasks(array $tasks)
+    {
+        return collect($tasks)->filter(function ($task) {
+            return $task['body'];
+        })->toArray();
     }
 }
