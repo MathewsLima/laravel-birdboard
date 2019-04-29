@@ -11,9 +11,9 @@
                             type="text"
                             id="title"
                             class="border p-2 text-sm w-full rounded"
-                            :class="errors.title ? 'border-error' : 'border-muted-light'"
+                            :class="form.errors.title ? 'border-error' : 'border-muted-light'"
                             v-model="form.title">
-                        <span class="text-xs italic text-error" v-if="errors.title">{{ errors.title[0] }}</span>
+                        <span class="text-xs italic text-error" v-if="form.errors.title">{{ form.errors.title[0] }}</span>
                     </div>
 
                     <div class="mb-4">
@@ -22,10 +22,10 @@
                             type="text"
                             id="description"
                             class="border border-muted-light p-2 text-sm w-full rounded"
-                            :class="errors.description ? 'border-error' : 'border-muted-light'"
+                            :class="form.errors.description ? 'border-error' : 'border-muted-light'"
                             rows="7" v-model="form.description">
                         </textarea>
-                        <span class="text-xs italic text-error" v-if="errors.description">{{ errors.description[0] }}</span>
+                        <span class="text-xs italic text-error" v-if="form.errors.description">{{ form.errors.description[0] }}</span>
                     </div>
                 </div>
 
@@ -52,41 +52,35 @@
 </template>
 
 <script>
+import BirdboardForm from './BirdboardForm';
+
 export default {
     data: () => ({
-        form: {
+        form: new BirdboardForm({
             title: '',
             description: '',
             tasks: [
                 { body: '' }
             ],
-        },
-        errors: {}
+        }),
     }),
     methods: {
         addTask() {
             this.form.tasks.push({ body: '' });
         },
         submit() {
-            axios.post('/projects', this.form)
-                .then(({ data }) => window.location = data.message)
-                .catch(error => this.attachErrors(error));
-        },
-        attachErrors(error) {
-            const { errors } = error.response.data;
-
-            this.errors = errors;
+            this.form.submit('/projects')
+                .then(({ data }) => window.location = data.message);
         },
         close() {
             this.$modal.hide('new-project');
-            this.errors = {};
-            this.form = {
+            this.form = new BirdboardForm({
                 title: '',
                 description: '',
                 tasks: [
                     { body: '' }
                 ]
-            };
+            });
         }
     }
 }
